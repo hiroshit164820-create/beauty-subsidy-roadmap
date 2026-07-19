@@ -226,7 +226,7 @@ def build_plan_html(pl, scheme, industry_label):
         + fig(sh.waterfall_subsidy(total, applied, self_pay, accent=scheme))
         + fig(sh.flow_h("申請から受給までの流れ（一般的な例）", [tuple(s) for s in sub["flowSteps"]], accent=scheme))
         + '<div class="callout small">'
-        + esc(sub.get("note", "")) +
+        + sub.get("note", "") +
         " 補助率・上限額・公募スケジュールは公募回により変動するため、申請前に必ず公式の公募要領を確認すること。"
         "同一経費への複数制度の重複受給はできない。</div>"
     )

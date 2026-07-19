@@ -19,7 +19,7 @@ def bar_before_after(title, rows, accent=GREEN, w=320, h=195):
     タイトルの長さに関わらず衝突しないようテキスト凡例は置かない。"""
     n = len(rows)
     maxv = max(max(r[1], r[2]) for r in rows) or 1
-    plot_h, base_y = 130.0, 160
+    plot_h, base_y = 113.0, 160
     group_w = (w - 60) / n
     out = [f'<svg viewBox="0 0 {w} {h}" width="100%" role="img" aria-label="{esc(title)}">']
     out.append(f'<text x="10" y="16" font-size="11" font-weight="bold" fill="{INK}">{esc(title)}</text>')
@@ -82,24 +82,30 @@ def cost_stack(title, lines, total, unit, accent="#8a5a2b", w=320):
 
 
 def waterfall_subsidy(total, applied, self_pay, accent="#8a5a2b", w=320, h=170):
-    """投資総額 → 補助金 → 自己負担 のウォーターフォール"""
+    """投資総額 → 自己負担 → 補助金（見込） のウォーターフォール。
+    自己負担はベースラインから積み上げ、補助金（見込）は投資総額の上端に揃えて
+    「総額の上澄みが補助金でまかなわれる」イメージを示す。ラベルは各バーの実際の
+    描画位置（天面）に合わせて配置し、バー色との重なりを避ける。"""
     maxv = total or 1
-    plot_h, base_y = 108.0, 138
+    plot_h, base_y = 92.0, 138
     bw_, xs = 62, [40, 135, 230]
     ht = plot_h * total / maxv
     ha = plot_h * applied / maxv
     hs = plot_h * self_pay / maxv
+    top_total = base_y - ht
+    top_self = base_y - hs
+    top_applied = top_total  # 投資総額の天面に揃えて「上澄み」を表現
     out = [f'<svg viewBox="0 0 {w} {h}" width="100%" role="img" aria-label="自己負担の圧縮">']
     out.append(f'<text x="10" y="16" font-size="11" font-weight="bold" fill="{INK}">投資総額から自己負担への圧縮イメージ</text>')
     out.append(f'<line x1="20" y1="{base_y}" x2="{w-10}" y2="{base_y}" stroke="{LINE}"/>')
-    out.append(f'<rect x="{xs[0]}" y="{base_y-ht:.1f}" width="{bw_}" height="{ht:.1f}" fill="{BEIGE}" rx="3"/>')
-    out.append(f'<rect x="{xs[1]}" y="{base_y-ht:.1f}" width="{bw_}" height="{ha:.1f}" fill="{GREEN}" rx="3"/>')
-    out.append(f'<rect x="{xs[2]}" y="{base_y-hs:.1f}" width="{bw_}" height="{hs:.1f}" fill="{accent}" rx="3"/>')
-    out.append(f'<line x1="{xs[1]+bw_}" y1="{base_y-hs:.1f}" x2="{xs[2]}" y2="{base_y-hs:.1f}" stroke="{SUB}" stroke-dasharray="3 3"/>')
-    labels = [("投資総額", total, xs[0]), ("補助金（見込）", applied, xs[1]), ("自己負担", self_pay, xs[2])]
-    for label, v, x in labels:
+    out.append(f'<rect x="{xs[0]}" y="{top_total:.1f}" width="{bw_}" height="{ht:.1f}" fill="{BEIGE}" rx="3"/>')
+    out.append(f'<rect x="{xs[1]}" y="{top_self:.1f}" width="{bw_}" height="{hs:.1f}" fill="{accent}" rx="3"/>')
+    out.append(f'<rect x="{xs[2]}" y="{top_applied:.1f}" width="{bw_}" height="{ha:.1f}" fill="{GREEN}" rx="3"/>')
+    out.append(f'<line x1="{xs[1]+bw_}" y1="{top_self:.1f}" x2="{xs[2]}" y2="{top_self:.1f}" stroke="{SUB}" stroke-dasharray="3 3"/>')
+    labels = [("投資総額", total, xs[0], top_total), ("自己負担", self_pay, xs[1], top_self), ("補助金（見込）", applied, xs[2], top_applied)]
+    for label, v, x, top in labels:
         out.append(f'<text x="{x+bw_/2}" y="{base_y+15}" font-size="9" fill="{SUB}" text-anchor="middle">{esc(label)}</text>')
-        out.append(f'<text x="{x+bw_/2}" y="{base_y-plot_h*v/maxv-6:.1f}" font-size="9.5" font-weight="bold" fill="{INK}" text-anchor="middle">{v:g}万円</text>')
+        out.append(f'<text x="{x+bw_/2}" y="{top-6:.1f}" font-size="9.5" font-weight="bold" fill="{INK}" text-anchor="middle">{v:g}万円</text>')
     out.append("</svg>")
     return "".join(out)
 
@@ -126,24 +132,47 @@ def gantt(title, rows, accent="#8a5a2b", months=12, w=440):
     return "".join(out)
 
 
+def _wrap_cjk(text, max_chars, max_lines=3):
+    """改行(\n)は語の区切りとしてのみ扱い、実際の折返しは文字数で再計算する
+    （枠幅に対して指定\n位置の行が長すぎてはみ出るのを防ぐため）。"""
+    s = str(text).replace("\n", "")
+    max_chars = max(3, int(max_chars))
+    lines = []
+    while s and len(lines) < max_lines:
+        lines.append(s[:max_chars])
+        s = s[max_chars:]
+    if s and lines:
+        lines[-1] = lines[-1][:max(1, max_chars - 1)] + "…"
+    return lines
+
+
 def flow_h(title, steps, accent="#8a5a2b", w=440):
-    """steps: [(head, body)] 横並びの矢印フロー(最大5)"""
+    """steps: [(head, body)] 横並びの矢印フロー(最大5)。箱幅に応じて本文を自動折返しする。"""
     n = len(steps)
-    box_w = (w - 20 - (n - 1) * 22) / n
-    h = 108
+    gap = 14 if n >= 5 else 22
+    box_w = (w - 20 - (n - 1) * gap) / n
+    fsize = 8.6 if box_w >= 90 else (7.6 if box_w >= 72 else 6.9)
+    max_chars = max(3, box_w / (fsize * 1.02))
+    box_h = 76
+    h = 28 + box_h + 8
     out = [f'<svg viewBox="0 0 {w} {h}" width="100%" role="img" aria-label="{esc(title)}">']
     out.append(f'<text x="10" y="16" font-size="11" font-weight="bold" fill="{INK}">{esc(title)}</text>')
     for i, (head, body) in enumerate(steps):
-        x = 10 + i * (box_w + 22)
-        out.append(f'<rect x="{x:.1f}" y="28" width="{box_w:.1f}" height="62" fill="#fcfaf6" stroke="{accent}" rx="8"/>')
+        x = 10 + i * (box_w + gap)
+        out.append(f'<rect x="{x:.1f}" y="28" width="{box_w:.1f}" height="{box_h}" fill="#fcfaf6" stroke="{accent}" rx="8"/>')
         out.append(f'<rect x="{x:.1f}" y="28" width="{box_w:.1f}" height="20" fill="{accent}" rx="8"/>')
         out.append(f'<rect x="{x:.1f}" y="40" width="{box_w:.1f}" height="8" fill="{accent}"/>')
-        out.append(f'<text x="{x+box_w/2:.1f}" y="42" font-size="8.6" font-weight="bold" fill="#fff" text-anchor="middle">{esc(head)}</text>')
-        for j, ln in enumerate(str(body).split("\n")[:2]):
-            out.append(f'<text x="{x+box_w/2:.1f}" y="{62+j*13}" font-size="7.8" fill="{SUB}" text-anchor="middle">{esc(ln)}</text>')
+        head_lines = _wrap_cjk(head, max(3, box_w / (8.6 * 1.02)), max_lines=1)
+        out.append(f'<text x="{x+box_w/2:.1f}" y="42" font-size="8.6" font-weight="bold" fill="#fff" text-anchor="middle">{esc("".join(head_lines))}</text>')
+        body_lines = _wrap_cjk(body, max_chars, max_lines=3)
+        line_h = fsize + 4.6
+        body_top = 28 + 20 + 8 + fsize
+        for j, ln in enumerate(body_lines):
+            out.append(f'<text x="{x+box_w/2:.1f}" y="{body_top+j*line_h:.1f}" font-size="{fsize}" fill="{SUB}" text-anchor="middle">{esc(ln)}</text>')
         if i < n - 1:
-            ax = x + box_w + 3
-            out.append(f'<path d="M {ax:.1f} 59 l 13 0 l -4 -5 m 4 5 l -4 5" stroke="{SUB}" stroke-width="1.6" fill="none"/>')
+            alen = min(11, gap * 0.55)
+            ax = x + box_w + (gap - alen) / 2
+            out.append(f'<path d="M {ax:.1f} {28+box_h/2:.1f} l {alen:.1f} 0 l -4 -5 m 4 5 l -4 5" stroke="{SUB}" stroke-width="1.6" fill="none"/>')
     out.append("</svg>")
     return "".join(out)
 
@@ -255,9 +284,10 @@ def gauge_row(title, gauges, accent="#8a5a2b", w=440):
     return "".join(out)
 
 
-def risk_matrix(items, accent="#8a5a2b", w=320, h=230):
-    """items: [(short_label, impact 1-2, likelihood 1-2)] 2x2マトリクス"""
-    x0, y0, cw, ch = 60, 34, 120, 78
+def risk_matrix(items, accent="#8a5a2b", w=320, h=260):
+    """items: [(short_label, impact 1-2, likelihood 1-2)] 2x2マトリクス。
+    ラベルは本文(.ul等 約10pt相当)に合わせた文字サイズで表示する。"""
+    x0, y0, cw, ch = 66, 34, 118, 88
     out = [f'<svg viewBox="0 0 {w} {h}" width="100%" role="img" aria-label="リスクマトリクス">']
     out.append(f'<text x="10" y="16" font-size="11" font-weight="bold" fill="{INK}">リスクマトリクス（影響度×発生可能性）</text>')
     colors = {(2, 2): "#f3ded9", (2, 1): "#f7ede0", (1, 2): "#f7ede0", (1, 1): "#eef0e8"}
@@ -266,19 +296,19 @@ def risk_matrix(items, accent="#8a5a2b", w=320, h=230):
             x = x0 + (ix - 1) * cw
             y = y0 + (2 - iy) * ch
             out.append(f'<rect x="{x}" y="{y}" width="{cw-4}" height="{ch-4}" fill="{colors[(ix,iy)]}" rx="8"/>')
-    out.append(f'<text x="{x0+cw/2}" y="{y0+2*ch+14}" font-size="8.5" fill="{SUB}" text-anchor="middle">発生可能性：低</text>')
-    out.append(f'<text x="{x0+cw*1.5}" y="{y0+2*ch+14}" font-size="8.5" fill="{SUB}" text-anchor="middle">発生可能性：高</text>')
-    out.append(f'<text x="{x0-8}" y="{y0+ch/2}" font-size="8.5" fill="{SUB}" text-anchor="end">影響大</text>')
-    out.append(f'<text x="{x0-8}" y="{y0+ch*1.5}" font-size="8.5" fill="{SUB}" text-anchor="end">影響小</text>')
+    out.append(f'<text x="{x0+cw/2}" y="{y0+2*ch+16}" font-size="9.3" fill="{SUB}" text-anchor="middle">発生可能性：低</text>')
+    out.append(f'<text x="{x0+cw*1.5}" y="{y0+2*ch+16}" font-size="9.3" fill="{SUB}" text-anchor="middle">発生可能性：高</text>')
+    out.append(f'<text x="{x0-10}" y="{y0+ch/2}" font-size="9.3" fill="{SUB}" text-anchor="end">影響大</text>')
+    out.append(f'<text x="{x0-10}" y="{y0+ch*1.5}" font-size="9.3" fill="{SUB}" text-anchor="end">影響小</text>')
     slots = {}
     for label, impact, likelihood in items:
         key = (likelihood, impact)
         slots.setdefault(key, []).append(label)
     for (lx, ly), labels in slots.items():
         x = x0 + (lx - 1) * cw + 10
-        y = y0 + (2 - ly) * ch + 18
+        y = y0 + (2 - ly) * ch + 20
         for j, lb in enumerate(labels[:3]):
-            out.append(f'<circle cx="{x+5}" cy="{y+j*20-3}" r="3.5" fill="{accent}"/>')
-            out.append(f'<text x="{x+14}" y="{y+j*20}" font-size="7.8" fill="{INK}">{esc(lb)}</text>')
+            out.append(f'<circle cx="{x+5}" cy="{y+j*24-3}" r="4" fill="{accent}"/>')
+            out.append(f'<text x="{x+15}" y="{y+j*24}" font-size="9.8" fill="{INK}">{esc(lb)}</text>')
     out.append("</svg>")
     return "".join(out)
