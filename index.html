@@ -21,13 +21,13 @@
     --paper-raised: #f8f9f4;
     --ink: #1b2420;
     --ink-soft: #4a564d;
-    --ink-faint: #7c8880;
-    --accent: #a8752f;
+    --ink-faint: #636e67;
+    --accent: #906428;
     --accent-soft: #e7d3ac;
     --accent-wash: #f2e9d6;
     --sage: #5f7360;
     --sage-wash: #e2e8de;
-    --rust: #9c5539;
+    --rust: #b43023;
     --rust-wash: #ecdcd2;
     --line: #d5cfbf;
     --shadow: rgba(27, 36, 32, 0.10);
@@ -45,7 +45,7 @@
       --accent-wash: #2b2313;
       --sage: #93a88d;
       --sage-wash: #202823;
-      --rust: #d1937a;
+      --rust: #d89c64;
       --rust-wash: #2c211d;
       --line: #2c342e;
       --shadow: rgba(0, 0, 0, 0.4);
@@ -63,7 +63,7 @@
     --accent-wash: #2b2313;
     --sage: #93a88d;
     --sage-wash: #202823;
-    --rust: #d1937a;
+    --rust: #d89c64;
     --rust-wash: #2c211d;
     --line: #2c342e;
     --shadow: rgba(0, 0, 0, 0.4);
@@ -74,13 +74,13 @@
     --paper-raised: #f8f9f4;
     --ink: #1b2420;
     --ink-soft: #4a564d;
-    --ink-faint: #7c8880;
-    --accent: #a8752f;
+    --ink-faint: #636e67;
+    --accent: #906428;
     --accent-soft: #e7d3ac;
     --accent-wash: #f2e9d6;
     --sage: #5f7360;
     --sage-wash: #e2e8de;
-    --rust: #9c5539;
+    --rust: #b43023;
     --rust-wash: #ecdcd2;
     --line: #d5cfbf;
     --shadow: rgba(27, 36, 32, 0.10);
@@ -210,9 +210,8 @@
     position: sticky; top: 0; z-index: 10;
     background: var(--paper);
     border-bottom: 1px solid var(--line);
-    overflow-x: auto;
-    white-space: nowrap;
   }
+  nav.toc .toc-scroll { overflow-x: auto; white-space: nowrap; }
   nav.toc .row { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; display: flex; gap: 1.6rem; }
   nav.toc a {
     display: inline-block;
@@ -236,8 +235,28 @@
   p { max-width: 68ch; }
 
   /* ---------- Tables ---------- */
-  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--paper-raised); }
+  .table-wrap { position: relative; border: 1px solid var(--line); border-radius: 6px; background: var(--paper-raised); }
+  .table-scroll { overflow-x: auto; border-radius: inherit; }
   table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 0.92rem; }
+
+  /* ---------- Scroll-fade hint (nav tabs / equipment table on narrow screens) ---------- */
+  .scroll-fade {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 2.4rem;
+    background: linear-gradient(to right, transparent, var(--paper-raised));
+    pointer-events: none; opacity: 0; transition: opacity 0.15s ease;
+    border-radius: 0 6px 6px 0;
+  }
+  .scroll-fade.is-visible { opacity: 1; }
+  .toc-fade { background: linear-gradient(to right, transparent, var(--paper)); border-radius: 0; }
+
+  .equip-links { display: flex; flex-direction: column; gap: 0.4rem; }
+  a.equip-link {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.82rem; color: var(--accent); text-decoration: none;
+    padding: 0.35rem 0.6rem; border: 1px solid var(--accent-soft); border-radius: 5px;
+    background: var(--paper); white-space: nowrap; min-height: 1.9rem;
+  }
+  a.equip-link:hover, a.equip-link:focus-visible { border-color: var(--accent); background: var(--accent-soft); }
   thead th {
     text-align: left;
     font-size: 0.72rem;
@@ -662,16 +681,19 @@
 </header>
 
 <nav class="toc">
-  <div class="row">
-    <a href="#favPanel">☆ お気に入り</a>
-    <a href="#premise">対象と前提</a>
-    <a href="#conditions">導入条件</a>
-    <a href="#ranking">業務改善10分類</a>
-    <a href="#equipment">必要機材一覧</a>
-    <a href="#simulator">概算シミュレーター</a>
-    <a href="#notes">留意事項</a>
-    <a href="improvement/">改善計画10選</a>
+  <div class="toc-scroll">
+    <div class="row">
+      <a href="#favPanel">☆ お気に入り</a>
+      <a href="#premise">対象と前提</a>
+      <a href="#conditions">導入条件</a>
+      <a href="#ranking">業務改善10分類</a>
+      <a href="#improvement-cta">改善計画10選</a>
+      <a href="#equipment">必要機材一覧</a>
+      <a href="#simulator">概算シミュレーター</a>
+      <a href="#notes">留意事項</a>
+    </div>
   </div>
+  <div class="scroll-fade toc-fade" aria-hidden="true"></div>
 </nav>
 
 <div class="fav-panel" id="favPanel">
@@ -908,21 +930,31 @@
 
     <div class="rank-list" id="rankList"></div>
   </section>
+
+  <section id="improvement-cta">
+    <div class="section-head"><span class="section-no jp-serif">03</span><h2>業種別・改善計画 厳選10選</h2></div>
+    <p class="section-sub">本サイトの6業種×100施策（計600施策）を費用対効果・業務改善効率でスコアリングし、業種ごとに10案へ厳選。各案に<strong>A4×10ページの事業計画書</strong>と<strong>導入システムの試作プロトタイプ</strong>を用意しています。選定プロセス（スコアリング基準・採択理由）も全公開。</p>
+    <p style="margin-top:0.8rem;"><a class="src-link" href="improvement/">改善計画10選を見る ↗</a>　<a class="src-link" href="improvement/pdca.html">選定の考え方（スコアリング全記録）↗</a></p>
+  </section>
+
   <section id="equipment">
-    <div class="section-head"><span class="section-no jp-serif">03</span><h2>必要機材・システム 一覧</h2></div>
+    <div class="section-head"><span class="section-no jp-serif">04</span><h2>必要機材・システム 一覧</h2></div>
     <p class="section-sub">10分類・100施策に対して今後開発・調達の対象となりうる機器／アプリ／システム／設備を分類別に整理した。</p>
     <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>分類</th><th>主要な機器・システム・アプリ</th><th class="num">概算費用</th><th>事業計画書・試作</th></tr>
-        </thead>
-        <tbody id="equipmentBody"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>分類</th><th>主要な機器・システム・アプリ</th><th class="num">概算費用</th><th>事業計画書・試作</th></tr>
+          </thead>
+          <tbody id="equipmentBody"></tbody>
+        </table>
+      </div>
+      <div class="scroll-fade" aria-hidden="true"></div>
     </div>
   </section>
 
   <section id="simulator">
-    <div class="section-head"><span class="section-no jp-serif">04</span><h2>概算シミュレーター</h2></div>
+    <div class="section-head"><span class="section-no jp-serif">05</span><h2>概算シミュレーター</h2></div>
     <p class="section-sub">使いたい制度・従業員数・業務改善の分類（複数選択可）を選ぶと、見込める補助金・助成金の概算受給額を試算する。対象経費の種類が一致しない分類はアラートで表示する。</p>
 
     <div class="picker">
@@ -950,14 +982,8 @@
     </div>
   </section>
 
-  <section id="improvement-cta">
-    <div class="section-head"><span class="section-no jp-serif">＋</span><h2>業種別・改善計画 厳選10選</h2></div>
-    <p class="section-sub">本サイトの6業種×100施策（計600施策）を費用対効果・業務改善効率でスコアリングし、業種ごとに10案へ厳選。各案に<strong>A4×10ページの事業計画書</strong>と<strong>導入システムの試作プロトタイプ</strong>を用意しています。選定プロセス（スコアリング基準・採択理由）も全公開。</p>
-    <p style="margin-top:0.8rem;"><a class="src-link" href="improvement/">改善計画10選を見る ↗</a>　<a class="src-link" href="improvement/pdca.html">選定の考え方（スコアリング全記録）↗</a></p>
-  </section>
-
   <section id="notes">
-    <div class="section-head"><span class="section-no jp-serif">05</span><h2>留意事項</h2></div>
+    <div class="section-head"><span class="section-no jp-serif">06</span><h2>留意事項</h2></div>
     <p>補助金・助成金の活用にあたっては、以下の点に留意すること。</p>
     <ul class="item-list" style="max-width:68ch;">
       <li>同一の経費に対して複数の制度から重複して受給することはできない。分類ごとに最も適合する制度を選び、経費区分を分けて申請する必要がある</li>
@@ -3250,7 +3276,7 @@
       var catRank = String(parseInt(row[0], 10));
       var plan = planMap[catRank];
       var linkCell = plan
-        ? '<a class="src-link" href="' + plan.planUrl + '">📄 計画書</a>　<a class="src-link" href="' + plan.protoUrl + '">🖥 試作を見る</a>'
+        ? '<div class="equip-links"><a class="equip-link" href="' + plan.planUrl + '">📄 計画書</a><a class="equip-link" href="' + plan.protoUrl + '">🖥 試作を見る</a></div>'
         : '<span style="color:var(--muted, #8a8478);font-size:0.85em;">—</span>';
       return '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td><td class="num tabular">' + row[2] + '万円</td><td>' + linkCell + '</td></tr>';
     }).join('');
@@ -3808,11 +3834,26 @@
     window.print();
   }
 
+  function setupScrollFade(scrollEl, fadeEl) {
+    if (!scrollEl || !fadeEl) return;
+    function update() {
+      var remaining = scrollEl.scrollWidth - scrollEl.clientWidth - scrollEl.scrollLeft;
+      fadeEl.classList.toggle('is-visible', remaining > 2);
+    }
+    scrollEl.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    if (window.ResizeObserver) { new ResizeObserver(update).observe(scrollEl); }
+    update();
+  }
+
   initCondCardToggles();
   initFavoriteStars();
   renderFavPanel();
   renderProgram('ai');
   switchIndustry('beauty');
+
+  setupScrollFade(document.querySelector('nav.toc .toc-scroll'), document.querySelector('nav.toc .toc-fade'));
+  setupScrollFade(document.querySelector('#equipment .table-scroll'), document.querySelector('#equipment .scroll-fade:not(.toc-fade)'));
 </script>
 
 </body>
