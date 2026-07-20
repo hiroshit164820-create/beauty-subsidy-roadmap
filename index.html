@@ -303,7 +303,8 @@
   .picker select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .program-detail { margin-top: 1.1rem; padding-top: 1.1rem; border-top: 1px dashed var(--line); }
   .pd-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.15rem; }
-  .pd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1rem 1.6rem; margin-top: 1rem; }
+  .pd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 0.9rem 0.9rem; margin-top: 1rem; }
+  .pd-item { border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem 0.85rem; background: var(--paper); }
   .pd-item .k { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); margin-bottom: 0.3rem; }
   .pd-item .v { font-size: 0.92rem; line-height: 1.6; }
   .pd-item .v .sub { display: block; font-size: 0.78rem; color: var(--ink-faint); margin-top: 0.15rem; }
@@ -335,6 +336,8 @@
   }
   .cond-card.is-open .cond-head::after { transform: rotate(180deg); }
   .cond-card:not(.is-open) .pd-grid, .cond-card:not(.is-open) .cond-faq { display: none; }
+  .cond-head-static { cursor: default; }
+  .cond-head-static::after { content: none; }
   .cond-head .stack { flex: 1 1 auto; min-width: 10rem; }
   .cond-head a.src-link { flex-shrink: 1; min-width: 0; }
   .cond-card .tier-list { margin-top: 0.4rem; max-width: 26rem; }
@@ -737,7 +740,11 @@
           <option value="tokyo">東京都</option>
         </select>
       </div>
-      <p class="t-note">入力すると、下の各制度カードに自社が対象かどうかのバッジが表示される。この選択は「概算シミュレーター」の従業員数選択と連動する。都道府県を選択すると、その自治体独自の制度カードが下に追加表示され、概算シミュレーターの対象制度にも加わる（現時点では東京都のみ対応。他道府県は順次追加予定）。</p>
+      <div class="prefecture-row" id="municipalityRow" style="margin-top:1rem; display:none;">
+        <label for="municipalitySelect">市区町村（任意）</label>
+        <select id="municipalitySelect" onchange="onMunicipalityChange(this.value)"></select>
+      </div>
+      <p class="t-note">入力すると、下の各制度カードに自社が対象かどうかのバッジが表示される。この選択は「概算シミュレーター」の従業員数選択と連動する。都道府県を選択すると、その自治体独自の制度カードが下に追加表示され、概算シミュレーターの対象制度にも加わる（現時点では東京都のみ対応。他道府県は順次追加予定）。東京都を選択すると市区町村も選べる（現時点では東京23区のみ。うち5区は業種を問わず使える汎用制度が確認できず、その旨を表示する）。</p>
     </div>
 
     <div class="picker">
@@ -983,6 +990,8 @@
         </div>
         <div class="cond-faq" id="condFaq-tokyo_soui"></div>
       </div>
+
+      <div id="municipalityCardSlot"></div>
 
     </div>
     <p class="section-sub" style="margin-top:0.8rem;">上記の6制度は業種を問わず共通で活用できる。加えて、<strong>飲食業・宿泊業・製造業・不動産業には業種特有の制度</strong>があり、選択中の業種に該当する場合はカードが追加表示される（教育・学習支援業については、業界特有の目立った国の制度は確認できなかった）。旧・中小企業新事業進出補助金（事業再構築補助金の後継）は第4回公募をもって終了し、製造業向けの後継制度「新事業進出・ものづくり商業サービス補助金」に統合された。</p>
@@ -1242,6 +1251,224 @@
       linkLabel: "東京都中小企業振興公社 公式ページを見る",
       schedule: "第2回：令和8年8月3日〜8月14日16時／第3回：11月2日〜11月13日16時／第4回：令和9年2月1日〜2月12日16時",
       continuity: "東京都・東京都中小企業振興公社が年複数回の公募を継続実施中。次年度以降の実施は予算措置次第（現時点で終了予定の発表はない）"
+    },
+    tokyo_minato_software: {
+      name: "中小企業ソフトウェア導入費等支援事業補助金（港区）",
+      prefecture: "tokyo", municipality: "minato",
+      scale: "区内中小企業者（詳細な資本金・従業員規模要件の明記なし）",
+      expense: "業務効率化のためのソフトウェア導入費（勤怠管理・生産管理・売上管理等）、同時導入する専用接続機器購入費",
+      rate: "ソフトウェア等3/4以内、専用接続機器2/3以内", cap: "ソフトウェア40万円＋機器20万円（合計上限60万円）",
+      wage: "特になし", acceptance: "非公表（予算上限到達次第終了）",
+      note: "実施主体は港区立産業振興センター（港区の運営施設）。",
+      link: "https://minato-sansin.com/software/", linkLabel: "港区立産業振興センター 公式ページを見る",
+      schedule: "令和8年4月13日〜令和9年1月31日（予算上限到達次第終了）",
+      continuity: "港区が実施する制度。次年度以降の実施は予算措置次第"
+    },
+    tokyo_bunkyo_seisansei: {
+      name: "持続可能性向上支援補助金・生産性向上設備（文京区）",
+      prefecture: "tokyo", municipality: "bunkyo",
+      scale: "区内に主たる事業所を置き、引き続き1年以上事業を営む中小企業者",
+      expense: "機械・装置、器具・備品、測定工具、建物附属設備、ソフトウェア（パソコン・タブレット等の汎用転用可能な設備は対象外）",
+      rate: "通常枠2/3以内（賃上げ枠4/5以内）", cap: "通常枠50万円（賃上げ枠・ISO14001認証取得者100万円）",
+      wage: "賃上げ枠のみ必須（従業員に3%以上の賃上げを表明）", acceptance: "非公表（各枠先着10件）",
+      note: "上半期・下半期の年2回募集。上半期の通常枠は例年早期に締切。",
+      link: "https://www.city.bunkyo.lg.jp/b012/p005132.html", linkLabel: "文京区 公式ページを見る",
+      schedule: "下半期：令和8年10月1日受付開始予定（上半期は受付終了）",
+      continuity: "文京区が年2期制で継続実施中"
+    },
+    tokyo_taito_keiei: {
+      name: "経営基盤強化支援（台東区）",
+      prefecture: "tokyo", municipality: "taito",
+      scale: "区内に営業の本拠（バーチャルオフィス・シェアオフィスを除く）があり、創業から1年以上経過した中小企業。農林漁業・金融業・不動産賃貸業等は対象外",
+      expense: "人手不足解消に資する業務管理・人材管理・知的財産管理の3カテゴリーの経費（産業財産権取得費含む）",
+      rate: "1/2以内", cap: "20万円",
+      wage: "特になし", acceptance: "非公表（予算満了次第終了）",
+      note: "実施主体は公益財団法人台東区産業振興事業団（台東区の外郭団体）。",
+      link: "https://taito-sangyo.jp/2026/03/27/keieikiban/", linkLabel: "台東区産業振興事業団 公式ページを見る",
+      schedule: "エントリー締切：令和9年1月29日17時／書類提出締切：令和9年3月1日17時",
+      continuity: "台東区産業振興事業団が予算ベースで毎年度運用していると見られる"
+    },
+    tokyo_sumida_digital: {
+      name: "墨田区デジタル技術活用支援補助金（墨田区）",
+      prefecture: "tokyo", municipality: "sumida",
+      scale: "区内に1年以上の主たる事業所を有する中小企業者",
+      expense: "ソフトウェア・クラウドサービス・ハードウェアの購入費、利用料、運用保守費、導入設定費、技術指導・研修費（汎用事務機器・中古品・HP新設改修等は対象外）",
+      rate: "3/4以内", cap: "50万円（下限5万円）",
+      wage: "特になし", acceptance: "非公表（予算上限到達で早期終了あり）",
+      note: "対象経費の幅が広く、デジタル導入全般に使いやすい制度。",
+      link: "https://www.city.sumida.lg.jp/sangyo_jigyosya/sangyo/hojokin_joseikin/smddigital.html", linkLabel: "墨田区 公式ページを見る",
+      schedule: "令和8年4月1日〜11月30日17時必着（予算上限到達次第終了）",
+      continuity: "墨田区が毎年度実施している制度"
+    },
+    tokyo_koto_ict: {
+      name: "ICT等導入支援事業（江東区）",
+      prefecture: "tokyo", municipality: "koto",
+      scale: "区内に本店・事業所を有する中小企業者（創業予定者含む）。直近2か年度に本補助金の交付を受けていないこと",
+      expense: "ソフトウェア・システム（ソフト＋ハード）導入費、IoT機器導入費、キャッシュレス端末機器導入費、テレワーク関連機器等",
+      rate: "1/2以内", cap: "50万円",
+      wage: "特になし", acceptance: "非公表",
+      note: "通年受付・要事前相談。明確な締切の記載はなし。",
+      link: "https://www.city.koto.lg.jp/102020/sangyoshigoto/sangyo/itc_shien.html", linkLabel: "江東区 公式ページを見る",
+      schedule: "通年受付（要事前相談）",
+      continuity: "「直近2か年度」の除外要件があることから毎年度実施と判断"
+    },
+    tokyo_shinagawa_digital: {
+      name: "デジタル技術活用推進助成・ソフトウェア（品川区）",
+      prefecture: "tokyo", municipality: "shinagawa",
+      scale: "区内に本社・主な事業所を有し1年以上継続事業を営む中小企業。前年度の同事業採択事業者は対象外",
+      expense: "会計/経理・総務/人事・法務・営業等、事務作業のデジタル化に係るソフトウェア・クラウドサービス導入費",
+      rate: "2/3以内", cap: "60万円",
+      wage: "特になし", acceptance: "非公表（予算上限到達次第終了）",
+      note: "令和4年度開始。委託運営の専用申請サイトから申し込む方式。",
+      link: "https://shinagawa-dx-digital.com/digital_subsidy/", linkLabel: "品川区DX推進事業 公式ページを見る",
+      schedule: "令和8年5月11日〜令和9年1月29日17時必着",
+      continuity: "令和4年度から継続実施中"
+    },
+    tokyo_meguro_shoryokuka: {
+      name: "めぐろ中小企業省力化投資補助金（目黒区）",
+      prefecture: "tokyo", municipality: "meguro",
+      scale: "区内中小企業者・社会福祉法人（常時従業員300人以下）。過去受給歴がある事業者は対象外",
+      expense: "国「中小企業省力化投資補助事業（カタログ注文型）」掲載の省力化製品本体購入費（券売機、清掃ロボット等）",
+      rate: "2/5以内（国の補助金と併用可）", cap: "40万円",
+      wage: "特になし", acceptance: "非公表（先着順、目安50社程度）",
+      note: "国のカタログ注文型省力化投資補助金の上乗せ支援という位置づけ。受付期間の情報源間で表記に相違があり、最新の公募状況は要確認。",
+      link: "https://www.city.meguro.tokyo.jp/sangyoukeizai/shigoto/kigyoushien/syouryokuka.html", linkLabel: "目黒区 公式ページを見る",
+      schedule: "受付期間の表記に相違あり（要確認・区へ直接お問い合わせを推奨）",
+      continuity: "目黒区の中小企業支援メニューの一つとして継続掲載"
+    },
+    tokyo_setagaya_keiei: {
+      name: "世田谷区中小事業者経営支援補助金（世田谷区）",
+      prefecture: "tokyo", municipality: "setagaya",
+      scale: "区内に事務所・事業所を有する中小事業者・個人事業主等（バーチャルオフィスは対象外）",
+      expense: "ITを活用した販路拡大（HP制作・ECサイト構築・PR動画等）、または生産性向上設備導入（業務効率化・省エネに資する設備）",
+      rate: "1/2以内", cap: "ITを活用した販路拡大20万円／生産性向上設備40万円（下限10万円）",
+      wage: "明記なし（賃上げへの寄与は事業目的として言及）", acceptance: "非公表（予算上限に達し次第終了）",
+      note: "具体的な締切日は公式ページに明記されておらず、募集要項PDFの確認が必要。",
+      link: "https://www.city.setagaya.lg.jp/03647/11321.html", linkLabel: "世田谷区 公式ページを見る",
+      schedule: "予算上限に達し次第終了（具体的な締切日の明記なし）",
+      continuity: "世田谷区が複数年度にわたり継続実施中"
+    },
+    tokyo_nakano_keieiryoku: {
+      name: "中野区経営力強化支援事業補助金（中野区）",
+      prefecture: "tokyo", municipality: "nakano",
+      scale: "中小企業基本法上の中小企業者。区内に主たる事業所を有し税の滞納がないこと",
+      expense: "販路開拓支援、多様性への対応支援、創業期の広報力強化支援（創業5年未満）、IT・DX対応支援（専門家派遣）、子育て環境施設整備支援",
+      rate: "1/2以内", cap: "20万円（複数メニュー利用時も合計上限20万円）",
+      wage: "特になし", acceptance: "非公表（予算上限到達次第終了）",
+      note: "複数の支援メニューから選択できる制度。IT・DX対応支援は専門家派遣費用が中心で、設備購入費とは性質が異なる点に留意。",
+      link: "https://www.city.tokyo-nakano.lg.jp/jigyosha/sangyoshinko/josei/chusho_r8keieiryoku.html", linkLabel: "中野区 公式ページを見る",
+      schedule: "令和8年4月1日〜令和9年1月31日（予算上限到達次第終了）",
+      continuity: "令和6・7年度も同名で実施の実績があり毎年度実施と見られる"
+    },
+    tokyo_suginami_digital: {
+      name: "中小企業等デジタル化推進事業助成（杉並区）",
+      prefecture: "tokyo", municipality: "suginami",
+      scale: "区内に1年以上営業する主たる事業所を有する中小企業者等（医療法人・NPO法人・公益法人等含む）",
+      expense: "新規デジタル化または既存システムの入替等、新規性のある取組に必要な経費（ソフト・ハード購入、システム構築業務委託、HP制作、技術指導費等）",
+      rate: "中小企業者2/3以内（小規模企業者3/4以内）", cap: "50万円（両区分共通）",
+      wage: "特になし", acceptance: "非公表（先着順、予算到達次第終了）",
+      note: "東京都の地域産業デジタル化推進事業費補助金を活用した制度。",
+      link: "https://www.city.suginami.tokyo.jp/s121/1754.html", linkLabel: "杉並区 公式ページを見る",
+      schedule: "令和8年6月1日〜10月30日（先着順、予算到達次第終了）",
+      continuity: "都補助金の活用スキームのため、都事業の継続状況に連動する可能性あり"
+    },
+    tokyo_toshima_keiei: {
+      name: "豊島区中小企業支援事業補助金・経営安定コース（豊島区）",
+      prefecture: "tokyo", municipality: "toshima",
+      scale: "区内中小企業者（個人事業主含む）で、区内で3か月以上事業継続。医療法人・NPO法人・社会福祉法人等は対象外",
+      expense: "事業PR経費（看板・チラシ・広告掲載・HP作成等）、専門家活用経費、人材育成・リスキリング経費",
+      rate: "1/2以内", cap: "15万円（千円未満切捨て）",
+      wage: "特になし", acceptance: "非公表",
+      note: "姉妹制度に「開業支援コース」「コラボチャレンジコース」がある。",
+      link: "https://www.city.toshima.lg.jp/584/machizukuri/sangyo/kigyo/019174.html", linkLabel: "豊島区 公式ページを見る",
+      schedule: "事前申請：令和8年5月11日〜11月27日／交付申請：〜令和9年1月22日",
+      continuity: "令和6・7年度も同名で実施の実績があり毎年度実施と見られる"
+    },
+    tokyo_kita_itiot: {
+      name: "IT・IoT導入チャレンジ支援事業（北区）",
+      prefecture: "tokyo", municipality: "kita",
+      scale: "区内に本社・主事業所を有し1年以上継続営業する中小企業者。法人都民税（個人は特別区民税）の滞納がないこと",
+      expense: "ソフトウェア費用、データ収集機器費用、クラウド費用、リース料、専門家経費等（消費税・個人カード決済分・自社製品購入等は対象外）",
+      rate: "3/4以内", cap: "100万円（下限：補助対象経費5万円未満は対象外）",
+      wage: "明記なし", acceptance: "非公表",
+      note: "23区の同種制度の中でも上限額が高めの制度。",
+      link: "https://www.city.kita.lg.jp/business/industry/1011356/1011509/1011519.html", linkLabel: "北区 公式ページを見る",
+      schedule: "事前相談WEB申込：4月1日開始／申請書類提出期限：令和9年2月26日",
+      continuity: "募集要項が年度ごとに作成されており継続実施と見られる"
+    },
+    tokyo_arakawa_jizoku: {
+      name: "商業・サービス業事業継続力強化支援事業補助金（荒川区）",
+      prefecture: "tokyo", municipality: "arakawa",
+      scale: "商業・サービス業の中小企業者で、区内に本社を有してから1年以上継続事業。大企業の実質的参画がないこと",
+      expense: "設備等の導入（POSレジシステム、LED照明工事、店舗内装工事等）、マーケティング活動（販促チラシ、HP制作等）",
+      rate: "通常1/4以内（賃上げ要件充足時またはデジタル化特例で1/2以内）", cap: "通常100万円（特例200万円）",
+      wage: "特例適用時のみ必須（給与支給総額2%以上増加＋事業場内最低賃金＋30円以上）", acceptance: "非公表",
+      note: "製造業向けには別途「製造業等企業価値向上支援事業補助金」（上限100万円・特例300万円）がある。",
+      link: "https://www.city.arakawa.tokyo.jp/a020/jigyousha/jigyouunei/r4hojyo.html", linkLabel: "荒川区 公式ページを見る",
+      schedule: "令和9年2月12日まで（当年度分）",
+      continuity: "過去年度から継続実施と見られる"
+    },
+    tokyo_itabashi_digital: {
+      name: "デジタル化・データ利活用推進助成金（板橋区）",
+      prefecture: "tokyo", municipality: "itabashi",
+      scale: "区内に本社・事業所を有し概ね1年以上継続事業する中小企業者（個人事業主含む）",
+      expense: "ソフトウェア・システム導入費、委託料・外注費、講習受講料等の導入関連費（ECサイト関連は対象外）",
+      rate: "コースア（バックオフィス効率化）1/2以内、コースイ（業務管理システム）1/2以内、コースウ（データ利活用経営）2/3以内",
+      cap: "コースア50万円／コースイ250万円／コースウ500万円",
+      wage: "特になし", acceptance: "非公表（予算上限到達次第終了）",
+      note: "実施主体は公益財団法人板橋区産業振興公社（板橋区の外郭団体）。前年度は「デジタル環境構築補助金」という名称で実施。",
+      link: "https://itabashi-kohsha.com/subsidies/hruq3mhmotj1aane.html", linkLabel: "板橋区産業振興公社 公式ページを見る",
+      schedule: "事前相談予約：4月1日9時開始／申請受付：5月11日以降（予算上限到達次第終了）",
+      continuity: "名称変更を経て継続実施と見られる"
+    },
+    tokyo_nerima_challenge: {
+      name: "新規ビジネスチャレンジ補助事業（練馬区）",
+      prefecture: "tokyo", municipality: "nerima",
+      scale: "中小企業基本法上の中小企業者、商店会、NPO法人等。区内で1年以上継続事業し複式簿記による青色申告実施が条件",
+      expense: "商品開発費、器具・備品購入費、広報費、システム構築・改修費、工事費等（新市場参入・新商品/サービス開発関連）",
+      rate: "2/3以内", cap: "100万円",
+      wage: "特になし", acceptance: "非公表",
+      note: "実施主体は練馬区産業振興公社（ネリサポ）。練馬区には他区にあるような「IT機器等導入費補助」単体の制度は確認できず、この新事業開発系の制度を代表として掲載。",
+      link: "https://www.city.nerima.tokyo.jp/kusei/sangyo/jigyosha/bizichalle.html", linkLabel: "練馬区 公式ページを見る",
+      schedule: "上期：令和8年4月1日〜4月30日／下期：8月1日〜8月31日",
+      continuity: "毎年度実施の可能性が高い（要確認）"
+    },
+    tokyo_adachi_kaizen: {
+      name: "小規模事業者等経営改善補助金（足立区）",
+      prefecture: "tokyo", municipality: "adachi",
+      scale: "小規模事業者中心（製造業等は従業員30人以下、商業・サービス業は従業員10人以下）。区内継続事業1年以上",
+      expense: "機械設備購入・リース料・設置工事、修理・改造・維持費、店舗改修、設計工事等",
+      rate: "区内事業者を50%以上利用の場合2/3以内、区外50%以上利用の場合1/2以内",
+      cap: "区内利用時250万円（下限5万円）／区外利用時150万円",
+      wage: "特になし", acceptance: "非公表",
+      note: "操業環境改善費補助（上限250万円・下限40万円、区内継続3年以上が条件）という別コースもある。",
+      link: "https://www.city.adachi.tokyo.jp/s-shinko/shigoto/chushokigyo/yushi-monozukuri.html", linkLabel: "足立区 公式ページを見る",
+      schedule: "相談予約提出：令和8年4月1日〜12月28日／申請期間：5月1日〜令和9年1月29日",
+      continuity: "「令和8年度」制度として毎年度実施と見られる"
+    },
+    tokyo_katsushika_digital: {
+      name: "葛飾区デジタル化支援事業費補助金（葛飾区）",
+      prefecture: "tokyo", municipality: "katsushika",
+      scale: "区内に主たる事業所を有し1年以上継続事業する中小企業者。区の「デジタル化合同セッション」相談等を受けデジタル導入診断書の発行が申請の必須条件",
+      expense: "ソフトウェア購入費、クラウドサービス利用料（1年分）、ハードウェア購入費（導入支援機器に限定）、外注費、専門家指導費、キャッシュレス決済機器",
+      rate: "1/2以内", cap: "50万円（うちハードウェア購入費は上限20万円）",
+      wage: "特になし", acceptance: "非公表",
+      note: "申請前に区の相談・診断書発行を受ける必要がある点に注意。",
+      link: "https://www.city.katsushika.lg.jp/business/1000011/1034399/1032622/index.html", linkLabel: "葛飾区 公式ページを見る",
+      schedule: "令和8年4月1日〜令和9年2月26日必着",
+      continuity: "複数年度にわたり実施中（毎年度実施）"
+    },
+    tokyo_edogawa_dx: {
+      name: "デジタル技術活用促進助成事業・DX導入（江戸川区）",
+      prefecture: "tokyo", municipality: "edogawa",
+      scale: "区内に本店・主たる事務所を有する中小企業者（業種別の中小企業基準に該当すること）",
+      expense: "機械装置費、委託費・外注費、クラウド使用料等のサービス利用料、専門家依頼経費、デジタル技術習得経費等",
+      rate: "2/3以内（SDGs達成に資する取組の場合4/5以内）", cap: "200万円",
+      wage: "特になし", acceptance: "非公表",
+      note: "より小規模向けの「IT導入」トラック（補助率2/3・上限50万円）も別途あり。両トラックとも江戸川区の制度。",
+      link: "https://www.city.edogawa.tokyo.jp/e093/shigotosangyo/jigyosha_oen/sangyo_jigyosya/jyosei/seisanseikojo/dounyu.html", linkLabel: "江戸川区 公式ページを見る",
+      schedule: "第2回：令和8年7月1日〜9月4日",
+      continuity: "令和2年度から継続実施を確認できる毎年度実施の制度"
     }
   };
 
@@ -1267,13 +1494,38 @@
 
   var RATE_BASE = { ai: 0.5, jizoku: 0.667, kaizen: 0.75, shoryokuka: 0.5, food_labor: 1.0, kanko_shoryokuka: 0.5, monodukuri: 0.5 };
 
-  var CAP = { ai: 450, jizoku: 50, kaizen: 450, shoryokuka: 750, career: 140, jinzai: 1000, food_labor: 1500, kanko_shoryokuka: 1000, monodukuri: 7000, tokyo_sogyo: 400, tokyo_digital: 150, tokyo_soui: 600 };
+  var CAP = {
+    ai: 450, jizoku: 50, kaizen: 450, shoryokuka: 750, career: 140, jinzai: 1000, food_labor: 1500, kanko_shoryokuka: 1000, monodukuri: 7000,
+    tokyo_sogyo: 400, tokyo_digital: 150, tokyo_soui: 600,
+    tokyo_minato_software: 60, tokyo_bunkyo_seisansei: 100, tokyo_taito_keiei: 20, tokyo_sumida_digital: 50, tokyo_koto_ict: 50,
+    tokyo_shinagawa_digital: 60, tokyo_meguro_shoryokuka: 40, tokyo_setagaya_keiei: 40, tokyo_nakano_keieiryoku: 20, tokyo_suginami_digital: 50,
+    tokyo_toshima_keiei: 15, tokyo_kita_itiot: 100, tokyo_arakawa_jizoku: 200, tokyo_itabashi_digital: 500, tokyo_nerima_challenge: 100,
+    tokyo_adachi_kaizen: 250, tokyo_katsushika_digital: 50, tokyo_edogawa_dx: 200
+  };
   var CAP_TEXT = {
     ai: "450万円", jizoku: "50万円（通常枠。賃金引上げ枠は200万円）", kaizen: "450万円（特例600万円）",
     shoryokuka: "750万円（特例1,000万円）",
     career: "140万円／人", jinzai: "1,000万円／年（事業所）",
     food_labor: "1,500万円（3領域合計）", kanko_shoryokuka: "1,000万円／施設", monodukuri: "7,000万円（特例9,000万円）",
-    tokyo_sogyo: "400万円（下限100万円）", tokyo_digital: "150万円（下限5万円）", tokyo_soui: "600万円"
+    tokyo_sogyo: "400万円（下限100万円）", tokyo_digital: "150万円（下限5万円）", tokyo_soui: "600万円",
+    tokyo_minato_software: "ソフト40万円＋機器20万円（合計上限60万円）",
+    tokyo_bunkyo_seisansei: "通常枠50万円（賃上げ枠100万円）",
+    tokyo_taito_keiei: "20万円",
+    tokyo_sumida_digital: "50万円（下限5万円）",
+    tokyo_koto_ict: "50万円",
+    tokyo_shinagawa_digital: "60万円",
+    tokyo_meguro_shoryokuka: "40万円",
+    tokyo_setagaya_keiei: "販路拡大20万円／生産性向上設備40万円（下限10万円）",
+    tokyo_nakano_keieiryoku: "20万円（複数メニュー合計上限）",
+    tokyo_suginami_digital: "50万円",
+    tokyo_toshima_keiei: "15万円",
+    tokyo_kita_itiot: "100万円（下限5万円）",
+    tokyo_arakawa_jizoku: "通常100万円（特例200万円）",
+    tokyo_itabashi_digital: "コースア50万円／イ250万円／ウ500万円",
+    tokyo_nerima_challenge: "100万円",
+    tokyo_adachi_kaizen: "区内利用250万円（下限5万円）／区外利用150万円",
+    tokyo_katsushika_digital: "50万円（うちハード20万円）",
+    tokyo_edogawa_dx: "200万円"
   };
   var EXPENSE_DESC = {
     ai: "予約管理・会計等のソフトウェア購入費やクラウド利用料",
@@ -1288,7 +1540,25 @@
     akiya: "空き家の改修・除却工事や事業スキーム構築（個別設備費ではない）",
     tokyo_sogyo: "創業初期の賃借料・広告費・器具備品購入費や人件費等",
     tokyo_digital: "デジタルツール（ソフトウェア・クラウド）本体費および導入関連費",
-    tokyo_soui: "原材料・副資材費、機械装置・工具器具費等の業務改善経費（収益悪化事業者向け）"
+    tokyo_soui: "原材料・副資材費、機械装置・工具器具費等の業務改善経費（収益悪化事業者向け）",
+    tokyo_minato_software: "業務効率化ソフトウェア導入費・専用接続機器費",
+    tokyo_bunkyo_seisansei: "機械・装置、器具・備品、測定工具、建物附属設備等",
+    tokyo_taito_keiei: "業務管理・人材管理・知的財産管理に関する経費",
+    tokyo_sumida_digital: "ソフト・クラウド・ハードの購入費、運用保守費、技術指導費",
+    tokyo_koto_ict: "ソフト・システム、IoT機器、キャッシュレス端末等の導入費",
+    tokyo_shinagawa_digital: "事務作業のデジタル化に係るソフト・クラウド導入費",
+    tokyo_meguro_shoryokuka: "国のカタログ注文型省力化製品の本体購入費",
+    tokyo_setagaya_keiei: "HP制作・ECサイト構築等のIT関連費、または生産性向上設備",
+    tokyo_nakano_keieiryoku: "販路開拓・広報・IT/DX専門家派遣等の経費",
+    tokyo_suginami_digital: "新規デジタル化・システム入替等の導入費",
+    tokyo_toshima_keiei: "事業PR経費・専門家活用経費・人材育成経費",
+    tokyo_kita_itiot: "ソフトウェア・データ収集機器・クラウド費用等",
+    tokyo_arakawa_jizoku: "POSレジ・LED照明工事・店舗内装等の設備導入費",
+    tokyo_itabashi_digital: "ソフトウェア・システム導入費、委託料・外注費等",
+    tokyo_nerima_challenge: "商品開発費、器具備品購入費、広報費、システム構築費等",
+    tokyo_adachi_kaizen: "機械設備購入・リース料・設置工事、店舗改修費等",
+    tokyo_katsushika_digital: "ソフトウェア・クラウド利用料、導入支援ハード等",
+    tokyo_edogawa_dx: "機械装置費、委託費、クラウド利用料、専門家依頼経費等"
   };
   var WAGE_REQUIRED = { kaizen: true, career: true, monodukuri: true };
 
@@ -3310,7 +3580,41 @@
 
   var currentIndustry = 'beauty';
   var currentPrefecture = '';
+  var currentMunicipality = '';
   var PREFECTURE_PROGRAM_KEYS = { tokyo: ['tokyo_sogyo', 'tokyo_digital', 'tokyo_soui'] };
+
+  // 東京23区。実装済み(MUNICIPALITY_PROGRAM_KEYSにキーがある)18区 + 汎用制度が確認できなかった5区(MUNICIPALITY_NOT_FOUND)。
+  var MUNICIPALITY_LABEL = {
+    tokyo: {
+      chiyoda: '千代田区', chuo: '中央区', minato: '港区', shinjuku: '新宿区', bunkyo: '文京区', taito: '台東区',
+      sumida: '墨田区', koto: '江東区', shinagawa: '品川区', meguro: '目黒区', ota: '大田区', setagaya: '世田谷区',
+      shibuya: '渋谷区', nakano: '中野区', suginami: '杉並区', toshima: '豊島区', kita: '北区', arakawa: '荒川区',
+      itabashi: '板橋区', nerima: '練馬区', adachi: '足立区', katsushika: '葛飾区', edogawa: '江戸川区'
+    }
+  };
+
+  var MUNICIPALITY_PROGRAM_KEYS = {
+    tokyo: {
+      minato: ['tokyo_minato_software'], bunkyo: ['tokyo_bunkyo_seisansei'], taito: ['tokyo_taito_keiei'],
+      sumida: ['tokyo_sumida_digital'], koto: ['tokyo_koto_ict'], shinagawa: ['tokyo_shinagawa_digital'],
+      meguro: ['tokyo_meguro_shoryokuka'], setagaya: ['tokyo_setagaya_keiei'], nakano: ['tokyo_nakano_keieiryoku'],
+      suginami: ['tokyo_suginami_digital'], toshima: ['tokyo_toshima_keiei'], kita: ['tokyo_kita_itiot'],
+      arakawa: ['tokyo_arakawa_jizoku'], itabashi: ['tokyo_itabashi_digital'], nerima: ['tokyo_nerima_challenge'],
+      adachi: ['tokyo_adachi_kaizen'], katsushika: ['tokyo_katsushika_digital'], edogawa: ['tokyo_edogawa_dx']
+    }
+  };
+
+  // 業種を問わず使える汎用的な区独自の設備投資・IT導入系補助金が、区の公式サイト調査時点(2026年7月)で確認できなかった区。
+  // 捏造を避けるため、存在しない制度をでっち上げず正直に「確認できず」と表示する。
+  var MUNICIPALITY_NOT_FOUND = {
+    tokyo: {
+      chiyoda: '業種を問わず使える設備投資・IT導入系の補助金は確認できませんでした。区の補助金一覧には展示会出展費補助（上限10〜20万円）等はありますが、対象経費が限定的です。',
+      chuo: '業種を問わず使える設備投資・IT導入系の補助金は確認できませんでした。区の補助金一覧にはホームページ作成費補助（上限30万円）等はありますが、対象経費が限定的です。',
+      shinjuku: 'かつて実施していた汎用制度「経営力強化支援事業補助金」は令和6年度で終了し、本稿時点で後継の募集は確認できませんでした。',
+      shibuya: '業種を問わず使える設備投資・IT導入系の補助金は確認できませんでした。区の支援策は特定エリアでの開業支援や商店会向けが中心です。',
+      ota: 'かつて実施していた「設備リニューアル臨時助成金」は令和8年5月29日で受付終了しており、本稿時点で後継の募集は確認できませんでした。'
+    }
+  };
 
   function catKey(i) { return 'cat' + String(i + 1).padStart(2, '0'); }
 
@@ -3368,12 +3672,11 @@
         return '<span class="pill ' + pillClass(p.key) + '">' + p.label + '</span>';
       }).join('');
       var effectHTML = cat.effectBullets.map(function (b) { return '<li>' + b + '</li>'; }).join('');
-      var openAttr = (idx === 0) ? ' open' : '';
       var plan = planMap[String(idx + 1)];
       var planLinksHTML = plan
-        ? '<div class="rank-links"><span class="rank-links-label">改善計画10選の関連資料</span><a class="equip-link" href="' + plan.planUrl + '">📄 事業計画書を見る</a><a class="equip-link" href="' + plan.protoUrl + '">🖥 試作デモを見る</a></div>'
+        ? '<div class="rank-links"><span class="rank-links-label">改善計画10選 PLAN' + String(plan.no).padStart(2, '0') + '「' + plan.title + '」の関連資料</span><a class="equip-link" href="' + plan.planUrl + '">📄 事業計画書を見る</a><a class="equip-link" href="' + plan.protoUrl + '">🖥 試作デモを見る</a></div>'
         : '';
-      html += '<details class="rank-card"' + openAttr + '>' +
+      html += '<details class="rank-card">' +
         '<summary>' +
           '<span class="rank-num tabular">' + String(idx + 1).padStart(2, '0') + '</span>' +
           '<div class="rank-meta"><div class="name">' + displayName + '</div><div class="why">' + cat.why + '</div></div>' +
@@ -3431,6 +3734,10 @@
     if (currentPrefecture && PREFECTURE_PROGRAM_KEYS[currentPrefecture]) {
       keys = keys.concat(PREFECTURE_PROGRAM_KEYS[currentPrefecture]);
     }
+    if (currentPrefecture && currentMunicipality &&
+        MUNICIPALITY_PROGRAM_KEYS[currentPrefecture] && MUNICIPALITY_PROGRAM_KEYS[currentPrefecture][currentMunicipality]) {
+      keys = keys.concat(MUNICIPALITY_PROGRAM_KEYS[currentPrefecture][currentMunicipality]);
+    }
     return keys;
   }
 
@@ -3448,7 +3755,10 @@
 
   function onPrefectureChange(value) {
     currentPrefecture = value;
+    currentMunicipality = '';
     updatePrefectureCards();
+    renderMunicipalitySelect();
+    renderMunicipalityCard();
     renderProgramSelects(currentIndustry);
     renderTrackSelect(document.getElementById('simProgram').value);
     updateEligibilityBadges();
@@ -3457,10 +3767,92 @@
     runSimulation();
   }
 
+  function renderMunicipalitySelect() {
+    var wrap = document.getElementById('municipalityRow');
+    var sel = document.getElementById('municipalitySelect');
+    var labels = MUNICIPALITY_LABEL[currentPrefecture];
+    if (!wrap || !sel) return;
+    if (!labels) {
+      wrap.style.display = 'none';
+      sel.innerHTML = '';
+      return;
+    }
+    wrap.style.display = 'block';
+    var optionsHTML = '<option value="">選択しない</option>' + Object.keys(labels).map(function (k) {
+      return '<option value="' + k + '">' + labels[k] + '</option>';
+    }).join('');
+    sel.innerHTML = optionsHTML;
+    sel.value = currentMunicipality;
+  }
+
+  function onMunicipalityChange(value) {
+    currentMunicipality = value;
+    renderMunicipalityCard();
+    renderProgramSelects(currentIndustry);
+    renderTrackSelect(document.getElementById('simProgram').value);
+    renderIndustryChrome(currentIndustry);
+    runSimulation();
+  }
+
+  function renderMunicipalityCard() {
+    var slot = document.getElementById('municipalityCardSlot');
+    if (!slot) return;
+    if (!currentPrefecture || !currentMunicipality) { slot.innerHTML = ''; return; }
+    var wardName = (MUNICIPALITY_LABEL[currentPrefecture] || {})[currentMunicipality] || currentMunicipality;
+    var progKeys = (MUNICIPALITY_PROGRAM_KEYS[currentPrefecture] || {})[currentMunicipality];
+    if (progKeys && progKeys.length) {
+      var html = progKeys.map(function (key) {
+        var p = PROGRAMS[key];
+        if (!p) return '';
+        return (
+          '<div class="cond-card cond-card-prefecture cond-card-municipality" style="display:block;">' +
+            '<div class="cond-head">' +
+              '<div class="stack"><span class="pill alt">' + p.name.replace(/（.*?）$/, '') + '</span><span class="sub">' + wardName + '</span></div>' +
+              '<a class="src-link" href="' + p.link + '" target="_blank" rel="noopener noreferrer">' + p.linkLabel + ' ↗</a>' +
+              '<span class="elig-badge warn">△ 要確認</span>' +
+            '</div>' +
+            '<div class="cond-card-prefecture-tag">' + wardName + '限定の制度</div>' +
+            '<div class="pd-grid">' +
+              '<div class="pd-item pd-item-wide"><div class="k">事業規模・雇用要件</div><div class="v">' + p.scale + '</div></div>' +
+              '<div class="pd-item"><div class="k">主な対象経費</div><div class="v">' + p.expense + '</div></div>' +
+              '<div class="pd-item"><div class="k">補助率</div><div class="v tabular">' + p.rate + '</div></div>' +
+              '<div class="pd-item"><div class="k">上限額</div><div class="v tabular">' + p.cap + '</div></div>' +
+              '<div class="pd-item"><div class="k">賃金上昇要件</div><div class="v">' + p.wage + '</div></div>' +
+              '<div class="pd-item"><div class="k">採択率／支給傾向</div><div class="v tabular">' + p.acceptance + '</div></div>' +
+              '<div class="pd-item"><div class="k">受付期間・次回締切</div><div class="v">' + p.schedule + '</div></div>' +
+              '<div class="pd-item"><div class="k">制度の継続性</div><div class="v">' + p.continuity + '</div></div>' +
+            '</div>' +
+            '<div class="pd-note">' + p.note + '</div>' +
+          '</div>'
+        );
+      }).join('');
+      slot.innerHTML = html;
+      initCondCardToggles(slot);
+    } else {
+      var note = (MUNICIPALITY_NOT_FOUND[currentPrefecture] || {})[currentMunicipality];
+      slot.innerHTML =
+        '<div class="cond-card cond-card-prefecture municipality-notfound" style="display:block;">' +
+          '<div class="cond-head cond-head-static"><div class="stack"><span class="pill alt">' + wardName + '</span><span class="sub">区独自の汎用制度は確認できず</span></div></div>' +
+          '<div class="cond-card-prefecture-tag">' + wardName + '</div>' +
+          '<p style="margin:0.7rem 0 0; font-size:0.88rem; color:var(--ink-soft); max-width:none;">' +
+            (note || (wardName + '独自の、業種を問わず使える設備投資・IT導入系の補助金は確認できませんでした。')) +
+            ' 最新の情報は' + wardName + 'の産業振興担当窓口へ直接お問い合わせください。' +
+          '</p>' +
+        '</div>';
+    }
+  }
+
+  function getOptionLabel(key) {
+    if (OPTION_LABEL[key]) return OPTION_LABEL[key];
+    var p = PROGRAMS[key];
+    if (!p) return key;
+    return p.name + (CAP_TEXT[key] ? '（上限' + CAP_TEXT[key].split('（')[0] + '）' : '');
+  }
+
   function renderProgramSelects(industryKey) {
     var keys = getAvailablePrograms(industryKey);
     var optionsHTML = keys.map(function (k) {
-      return '<option value="' + k + '">' + OPTION_LABEL[k] + '</option>';
+      return '<option value="' + k + '">' + getOptionLabel(k) + '</option>';
     }).join('');
     var sel1 = document.getElementById('programSelect');
     var sel2 = document.getElementById('simProgram');
@@ -3522,6 +3914,10 @@
     }
     if (progKey === 'tokyo_sogyo' || progKey === 'tokyo_soui') {
       // 創業からの年数・直近の営業利益の増減は本サイトの入力項目にないため、機械判定せず「要確認」に統一
+      return 'warn';
+    }
+    if (PROGRAMS[progKey] && PROGRAMS[progKey].municipality) {
+      // 区独自制度は「区内継続1年以上」等、区ごとに異なる基準があり本サイトの入力項目では判定できないため「要確認」に統一
       return 'warn';
     }
     // ai, kaizen, tokyo_digital: 中小企業者の基準（資本金または従業員数のいずれかを満たせばよい）を参照
@@ -3717,7 +4113,8 @@
       if (track.wageRequired !== undefined) trackWageOverride = track.wageRequired;
     }
 
-    if (progKey === 'career' || progKey === 'jinzai' || progKey === 'akiya' || progKey === 'tokyo_sogyo' || progKey === 'tokyo_digital' || progKey === 'tokyo_soui') {
+    var isLocalProgram = PROGRAMS[progKey] && (PROGRAMS[progKey].prefecture || PROGRAMS[progKey].municipality);
+    if (progKey === 'career' || progKey === 'jinzai' || progKey === 'akiya' || isLocalProgram) {
       var headlineHtml = '';
       if (progKey === 'career') {
         var headCount = Math.min(currentEmployeeCount, 20);
@@ -3851,8 +4248,10 @@
     updateFavoriteStars();
   }
 
-  function initCondCardToggles() {
-    document.querySelectorAll('.cond-card > .cond-head').forEach(function (head) {
+  function initCondCardToggles(root) {
+    (root || document).querySelectorAll('.cond-card > .cond-head').forEach(function (head) {
+      if (head.dataset.toggleBound) return;
+      head.dataset.toggleBound = '1';
       head.setAttribute('tabindex', '0');
       head.setAttribute('role', 'button');
       head.setAttribute('aria-expanded', 'false');
@@ -3991,6 +4390,7 @@
   renderFavPanel();
   renderProgram('ai');
   updatePrefectureCards();
+  renderMunicipalitySelect();
   switchIndustry('beauty');
 
   setupScrollFade(document.querySelector('nav.toc .toc-scroll'), document.querySelector('nav.toc .toc-fade'));
